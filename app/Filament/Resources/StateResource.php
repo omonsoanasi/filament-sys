@@ -2,13 +2,12 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CountryResource\Pages;
-use App\Filament\Resources\CountryResource\RelationManagers;
-use App\Filament\Resources\CountryResource\RelationManagers\EmployeesRelationManager;
-use App\Filament\Resources\CountryResource\RelationManagers\StatesRelationManager;
-use App\Models\Country;
+use App\Filament\Resources\StateResource\Pages;
+use App\Filament\Resources\StateResource\RelationManagers;
+use App\Models\State;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -18,13 +17,13 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CountryResource extends Resource
+class StateResource extends Resource
 {
-    protected static ?string $model = Country::class;
+    protected static ?string $model = State::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-globe';
+    protected static ?string $navigationIcon = 'heroicon-o-collection';
     protected static ?string $navigationGroup = 'System Management';
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -32,8 +31,9 @@ class CountryResource extends Resource
             ->schema([
                 Card::make()
                     ->schema([
-                        TextInput::make('country_code')->required()->maxLength(5),
-                        TextInput::make('name')->required()->maxLength(100),
+                        Select::make('country_id')
+                            ->relationship('country', 'name')->required(),
+                        TextInput::make('name')->required(),
                     ])
             ]);
     }
@@ -42,10 +42,9 @@ class CountryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('id')->sortable(),
-                TextColumn::make('country_code')->sortable()->searchable(),
-                TextColumn::make('name')->sortable()->searchable(),
-                TextColumn::make('created_at')->dateTime()
+                TextColumn::make('name')->searchable()->sortable(),
+                TextColumn::make('country.name')->searchable()->sortable(),
+                TextColumn::make('created_at')->dateTime(),
             ])
             ->filters([
                 //
@@ -61,17 +60,16 @@ class CountryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            EmployeesRelationManager::class,
-            StatesRelationManager::class,
+            //
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCountries::route('/'),
-            'create' => Pages\CreateCountry::route('/create'),
-            'edit' => Pages\EditCountry::route('/{record}/edit'),
+            'index' => Pages\ListStates::route('/'),
+            'create' => Pages\CreateState::route('/create'),
+            'edit' => Pages\EditState::route('/{record}/edit'),
         ];
     }
 }
